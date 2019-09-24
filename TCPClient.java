@@ -33,16 +33,20 @@ public class TCPClient {
         // TODO Step 1: implement this method
         // Hint: Remember to process all exceptions and return false on error
         // Hint: Remember to set up all the necessary input/output stream variables
+
         try {
-            socket = new Socket(host, port);
+            // Establish connection to the remote server
+            connection = new Socket(host, port);
             System.out.println("Successfully connected!");
-
-            //if disconnect is not in use: socket.close();
-        } catch (IOException e) {
-            System.out.println("Socket error: " + e.getMessage());
-
+            OutputStream out = connection.getOutputStream();
+            InputStream in = connection.getInputStream();
+            establishedConnection = true;
         }
-        return false;
+        catch (IOException e) {
+            System.out.println("Socket error: " + e.getMessage());
+            establishedConnection = false;
+        }
+        return establishedConnection;
     }
 
     /**
@@ -57,21 +61,21 @@ public class TCPClient {
     public synchronized void disconnect() {
         // TODO Step 4: implement this method
         // Hint: remember to check if connection is active
-        //if socket.open() then socket.close();
-        if (isConnectionActive() == true) {
+        if (isConnectionActive()) {
             try {
-                socket.close();
-                System.out.println("Disconnected.");
-            } catch (IOException ex) {
-                Logger.getLogger(TCPClient.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("Failed to disconnect.");
+                connection.close();
+                connection = null;
+                System.out.println("Successfully disconnected!");
             }
-
-        } else {
-            System.out.println("Failed to disconnect.");
+            catch (IOException ex) {
+                Logger.getLogger(no.ntnu.datakomm.chat.TCPClient.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Unable to disconnect!");
+            }
+        }
+        else {
+            System.out.println("Unable to disconnect!");
         }
     }
-
     /**
      * @return true if the connection is active (opened), false if not.
      */
