@@ -15,7 +15,7 @@ public class TCPClient {
     private PrintWriter toServer;
     private BufferedReader fromServer;
     private Socket connection;
-    private Socket socket;
+    boolean establishedConnection = false;
 
     // Hint: if you want to store a message for the last error, store it here
     private String lastError = null;
