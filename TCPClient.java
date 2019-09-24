@@ -7,11 +7,15 @@ import java.util.List;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TCPClient {
+
     private PrintWriter toServer;
     private BufferedReader fromServer;
     private Socket connection;
+    private Socket socket;
 
     // Hint: if you want to store a message for the last error, store it here
     private String lastError = null;
@@ -29,12 +33,14 @@ public class TCPClient {
         // TODO Step 1: implement this method
         // Hint: Remember to process all exceptions and return false on error
         // Hint: Remember to set up all the necessary input/output stream variables
-        try{
-            Socket socket = new Socket( host, port );
+        try {
+            socket = new Socket(host, port);
             System.out.println("Successfully connected!");
+
             //if disconnect is not in use: socket.close();
-        }catch (IOException e){
+        } catch (IOException e) {
             System.out.println("Socket error: " + e.getMessage());
+
         }
         return false;
     }
@@ -52,6 +58,18 @@ public class TCPClient {
         // TODO Step 4: implement this method
         // Hint: remember to check if connection is active
         //if socket.open() then socket.close();
+        if (isConnectionActive() == true) {
+            try {
+                socket.close();
+                System.out.println("Disconnected.");
+            } catch (IOException ex) {
+                Logger.getLogger(TCPClient.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Failed to disconnect.");
+            }
+
+        } else {
+            System.out.println("Failed to disconnect.");
+        }
     }
 
     /**
@@ -64,13 +82,36 @@ public class TCPClient {
     /**
      * Send a command to server.
      *
-     * @param cmd A command. It should include the command word and optional attributes, according to the protocol.
+     * @param cmd A command. It should include the command word and optional
+     * attributes, according to the protocol.
      * @return true on success, false otherwise
      */
     private boolean sendCommand(String cmd) {
         // TODO Step 2: Implement this method
         // Hint: Remember to check if connection is active
-        return false;
+        boolean sendCommandStatus;
+        if (isConnectionActive() == true) {
+            sendCommandStatus = true;
+            if(cmd.startsWith("msg"))
+            {
+                sendPublicMessage(cmd);
+            }
+            else if(cmd.startsWith("privmsg"))
+            {
+              //  sendPrivateMessage(cmd. , cmd);
+            }
+            else if(cmd.startsWith("help"))
+            {
+                System.out.println("Accepted cmd: msg, privmsg, users and help.");
+            }
+            else if(cmd.startsWith("users"))
+            {
+                
+            }
+        } else {
+            sendCommandStatus = false;
+        }
+        return sendCommandStatus;
     }
 
     /**
@@ -83,6 +124,7 @@ public class TCPClient {
         // TODO Step 2: implement this method
         // Hint: Reuse sendCommand() method
         // Hint: update lastError if you want to store the reason for the error.
+
         return false;
     }
 
@@ -110,7 +152,7 @@ public class TCPClient {
      * Send a private message to a single recipient.
      *
      * @param recipient username of the chat user who should receive the message
-     * @param message   Message to send
+     * @param message Message to send
      * @return true if message sent, false on error
      */
     public boolean sendPrivateMessage(String recipient, String message) {
@@ -120,7 +162,6 @@ public class TCPClient {
         return false;
     }
 
-
     /**
      * Send a request for the list of commands that server supports.
      */
@@ -128,7 +169,6 @@ public class TCPClient {
         // TODO Step 8: Implement this method
         // Hint: Reuse sendCommand() method
     }
-
 
     /**
      * Wait for chat server's response
@@ -157,7 +197,8 @@ public class TCPClient {
     }
 
     /**
-     * Start listening for incoming commands from the server in a new CPU thread.
+     * Start listening for incoming commands from the server in a new CPU
+     * thread.
      */
     public void startListenThread() {
         // Call parseIncomingCommands() in the new thread.
@@ -168,8 +209,8 @@ public class TCPClient {
     }
 
     /**
-     * Read incoming messages one by one, generate events for the listeners. A loop that runs until
-     * the connection is closed.
+     * Read incoming messages one by one, generate events for the listeners. A
+     * loop that runs until the connection is closed.
      */
     private void parseIncomingCommands() {
         while (isConnectionActive()) {
@@ -182,14 +223,11 @@ public class TCPClient {
 
             // TODO Step 5: update this method, handle user-list response from the server
             // Hint: In Step 5 reuse onUserList() method
-
             // TODO Step 7: add support for incoming chat messages from other users (types: msg, privmsg)
             // TODO Step 7: add support for incoming message errors (type: msgerr)
             // TODO Step 7: add support for incoming command errors (type: cmderr)
             // Hint for Step 7: call corresponding onXXX() methods which will notify all the listeners
-
             // TODO Step 8: add support for incoming supported command list (type: supported)
-
         }
     }
 
@@ -213,18 +251,16 @@ public class TCPClient {
         listeners.remove(listener);
     }
 
-
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // The following methods are all event-notificators - notify all the listeners about a specific event.
     // By "event" here we mean "information received from the chat server".
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * Notify listeners that login operation is complete (either with success or
      * failure)
      *
      * @param success When true, login successful. When false, it failed
-     * @param errMsg  Error message if any
+     * @param errMsg Error message if any
      */
     private void onLoginResult(boolean success, String errMsg) {
         for (ChatListener l : listeners) {
@@ -253,9 +289,9 @@ public class TCPClient {
     /**
      * Notify listeners that a message is received from the server
      *
-     * @param priv   When true, this is a private message
+     * @param priv When true, this is a private message
      * @param sender Username of the sender
-     * @param text   Message text
+     * @param text Message text
      */
     private void onMsgReceived(boolean priv, String sender, String text) {
         // TODO Step 7: Implement this method
