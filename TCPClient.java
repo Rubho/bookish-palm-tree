@@ -98,7 +98,7 @@ public class TCPClient {
             }
             else if(cmd.startsWith("privmsg"))
             {
-              //  sendPrivateMessage(cmd. , cmd);
+              sendPrivateMessage(cmd.substring(8) , cmd);
             }
             else if(cmd.startsWith("help"))
             {
