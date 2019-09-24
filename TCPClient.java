@@ -15,7 +15,7 @@ public class TCPClient {
     private PrintWriter toServer;
     private BufferedReader fromServer;
     private Socket connection;
-    private Socket socket;
+    boolean establishedConnection = false;
 
     // Hint: if you want to store a message for the last error, store it here
     private String lastError = null;
@@ -34,15 +34,20 @@ public class TCPClient {
         // Hint: Remember to process all exceptions and return false on error
         // Hint: Remember to set up all the necessary input/output stream variables
         try {
-            socket = new Socket(host, port);
+            connection = new Socket(host, port);
             System.out.println("Successfully connected!");
+            OutputStream out = connection.getOutputStream();
+            InputStream in = connection.getInputStream();
+            establishedConnection = true;
+
 
             //if disconnect is not in use: socket.close();
         } catch (IOException e) {
             System.out.println("Socket error: " + e.getMessage());
+            establishedConnection = false;
 
         }
-        return false;
+        return establishedConnection;
     }
 
     /**
@@ -58,9 +63,10 @@ public class TCPClient {
         // TODO Step 4: implement this method
         // Hint: remember to check if connection is active
         //if socket.open() then socket.close();
-        if (isConnectionActive() == true) {
+        if (isConnectionActive()) {
             try {
-                socket.close();
+                connection.close();
+                connection = null;
                 System.out.println("Disconnected.");
             } catch (IOException ex) {
                 Logger.getLogger(TCPClient.class.getName()).log(Level.SEVERE, null, ex);
