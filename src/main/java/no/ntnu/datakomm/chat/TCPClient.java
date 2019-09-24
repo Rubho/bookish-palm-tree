@@ -73,7 +73,29 @@ public class TCPClient {
     private boolean sendCommand(String cmd) {
         // TODO Step 2: Implement this method
         // Hint: Remember to check if connection is active
-        return false;
+        boolean sendCommandStatus;
+        if (isConnectionActive() == true) {
+            sendCommandStatus = true;
+            if(cmd.startsWith("msg"))
+            {
+                sendPublicMessage(cmd);
+            }
+            else if(cmd.startsWith("privmsg"))
+            {
+              //  sendPrivateMessage(cmd. , cmd);
+            }
+            else if(cmd.startsWith("help"))
+            {
+                System.out.println("Accepted cmd: msg, privmsg, users and help.");
+            }
+            else if(cmd.startsWith("users"))
+            {
+                
+            }
+        } else {
+            sendCommandStatus = false;
+        }
+        return sendCommandStatus;
     }
 
     /**
